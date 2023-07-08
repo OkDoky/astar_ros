@@ -1,0 +1,13 @@
+<launch>
+
+    <node pkg="map_server" name="map_server" type="map_server" args="$(find simulation-setup)/maps/ignc/map.yaml"/>
+
+    <node pkg="astar_ros" type="astar_ros" name="astar_server" output="screen">
+        <param name="Euclidean" value="true"/>
+        <param name="OccupyThresh" value="-1"/>
+        <param name="InflateRadius" value="0.25"/>
+    </node>
+
+    <!-- <node pkg="rviz" type="rviz" name="rviz" args="-d $(find astar)/rviz/astar.rviz"/> -->
+
+</launch>
