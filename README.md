@@ -26,7 +26,7 @@ git clone https://github.com/rohgal/astar_ros.git
 ```
 catkin_make
 ```
-- Launch A* ROS server
+- Launch A* ROS server.
 ```
 roslaunch astar_ros astar_server.launch
 ```
