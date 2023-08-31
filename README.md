@@ -1,5 +1,5 @@
 # A* for ROS
-This repo is an A* planner configured with ROS service.
+This repo is an A* planner compatible with ROS.
 
 ## Subscribed Topic
 - map (nav_msgs/OccupancyGrid)
