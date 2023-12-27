@@ -1,6 +1,6 @@
 <launch>
 
-    <node pkg="map_server" name="map_server" type="map_server" args="$(find simulation-setup)/maps/ignc/map.yaml"/>
+    <!-- <node pkg="map_server" name="map_server" type="map_server" args="$(find simulation-setup)/maps/ignc/map.yaml"/> -->
 
     <node pkg="astar_ros" type="astar_ros" name="astar_server" output="screen">
         <param name="Euclidean" value="true"/>
