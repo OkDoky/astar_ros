@@ -7,7 +7,7 @@
 
 #include "Astar.h"
 #include "OccMapTransform.h"
-#include "astar_ros/GetPlan.h"
+#include "astar_ros_msgs/GetPlan.h"
 
 // Object
 pathplanning::AstarConfig config;
@@ -16,6 +16,7 @@ OccupancyGridParam OccGridParam;
 
 // Parameters
 double InflateRadius;
+std::string map_frame;
 
 void MapCallback(const nav_msgs::OccupancyGrid& msg)
 {
@@ -42,10 +43,11 @@ void MapCallback(const nav_msgs::OccupancyGrid& msg)
     Mat Mask;
     config.InflateRadius = round(InflateRadius / OccGridParam.resolution);
     planner.InitAstar(Map, Mask, config);
+    ROS_WARN("[AStarServerNode] init planner.. finish map callback");
 }
 
 
-bool runAStar(astar_ros::GetPlan::Request& req, astar_ros::GetPlan::Response& res) {
+bool runAStar(astar_ros_msgs::GetPlan::Request& req, astar_ros_msgs::GetPlan::Response& res) {
   // Perform A*
   double start_time = ros::Time::now().toSec();
 
@@ -60,19 +62,17 @@ bool runAStar(astar_ros::GetPlan::Request& req, astar_ros::GetPlan::Response& re
   // Planning
   planner.PathPlanning(startpoint, targetpoint, PathList);
 
-  if(!PathList.empty())
-  {
+  if(!PathList.empty()) {
     res.path.header.stamp = ros::Time::now();
-    res.path.header.frame_id = "map";
+    res.path.header.frame_id = map_frame;
     res.path.poses.clear();
-    for(int i=0;i<PathList.size();i++)
-    {
+    geometry_msgs::PoseStamped pose_stamped;
+    pose_stamped.header.stamp = res.path.header.stamp;
+    pose_stamped.header.frame_id = res.path.header.frame_id;
+    for(int i=0;i<PathList.size();i++) {
         Point2d dst_point;
         OccGridParam.Image2MapTransform(PathList[i], dst_point);
 
-        geometry_msgs::PoseStamped pose_stamped;
-        pose_stamped.header.stamp = ros::Time::now();
-        pose_stamped.header.frame_id = "map";
         pose_stamped.pose.position.x = dst_point.x;
         pose_stamped.pose.position.y = dst_point.y;
         pose_stamped.pose.position.z = 0;
@@ -80,10 +80,7 @@ bool runAStar(astar_ros::GetPlan::Request& req, astar_ros::GetPlan::Response& re
     }
     double end_time = ros::Time::now().toSec();
     ROS_INFO("Find a valid path successfully! Use %f s", end_time - start_time);
-  }
-
-  else
-  {
+  } else {
         ROS_ERROR("Can not find a valid path");
   }
 
@@ -100,12 +97,11 @@ int main(int argc, char** argv) {
   nh_priv.param<bool>("Euclidean", config.Euclidean, true);
   nh_priv.param<int>("OccupyThresh", config.OccupyThresh, -1);
   nh_priv.param<double>("InflateRadius", InflateRadius, -1);
+  nh_priv.param<std::string>("map_frame", map_frame, "map");
 
   // Subscriber
-  ros::Subscriber map_sub = nh.subscribe("map", 10, MapCallback);
-
-  // Service
-  ros::ServiceServer service = nh.advertiseService("/get_astar_plan", runAStar);
+  ros::Subscriber map_sub = nh.subscribe("map", 1, MapCallback);
+  ros::ServiceServer service = nh.advertiseService("get_astar_plan", runAStar);
 
   ros::spin();
 

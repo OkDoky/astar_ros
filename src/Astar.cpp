@@ -23,14 +23,14 @@ void Astar::InitAstar(Mat& _Map, Mat& Mask, AstarConfig _config)
     MapProcess(Mask);
 }
 
-void Astar::PathPlanning(Point _startPoint, Point _targetPoint, vector<Point>& path)
+void Astar::PathPlanning(const Point& _startPoint, const Point& _targetPoint, vector<Point>& path)
 {
     // Get variables
     startPoint = _startPoint;
     targetPoint = _targetPoint;
 
     // Path Planning
-    Node* TailNode = FindPath();
+    Node* TailNode = FindPath(_startPoint, _targetPoint);
     GetPath(TailNode, path);
 }
 
@@ -99,7 +99,7 @@ void Astar::MapProcess(Mat& Mask)
     }
 }
 
-Node* Astar::FindPath()
+Node* Astar::FindPath(const Point& startPoint, const Point& targetPoint)
 {
     int width = Map.cols;
     int height = Map.rows;
@@ -144,34 +144,28 @@ Node* Astar::FindPath()
             {
                 // Determine whether a diagonal line can pass
                 int dist1 = abs(neighbor.at<char>(k, 0)) + abs(neighbor.at<char>(k, 1));
-                if(dist1 == 2 && _LabelMap.at<uchar>(y, curX) == obstacle && _LabelMap.at<uchar>(curY, x) == obstacle)
+                if(dist1 == 2 && _LabelMap.at<uchar>(y, curX) == obstacle && _LabelMap.at<uchar>(curY, x) == obstacle){
                     continue;
+                }
 
                 // Calculate G, H, F value
                 int addG, G, H, F;
-                if(dist1 == 2)
-                {
+                if(dist1 == 2) {
                     addG = 14;
-                }
-                else
-                {
+                } else {
                     addG = 10;
                 }
                 G = CurNode->G + addG;
-                if(config.Euclidean)
-                {
+                if(config.Euclidean) {
                     int dist2 = (x - targetPoint.x) * (x - targetPoint.x) + (y - targetPoint.y) * (y - targetPoint.y);
                     H = round(10 * sqrt(dist2));
-                }
-                else
-                {
+                } else {
                     H = 10 * (abs(x - targetPoint.x) + abs(y - targetPoint.y));
                 }
                 F = G + H;
 
                 // Update the G, H, F value of node
-                if(_LabelMap.at<uchar>(y, x) == free)
-                {
+                if(_LabelMap.at<uchar>(y, x) == free) {
                     Node* node = new Node();
                     node->point = Point(x, y);
                     node->parent = CurNode;
@@ -182,9 +176,7 @@ Node* Astar::FindPath()
                     int index = point2index(node->point);
                     OpenDict[index] = node;
                     _LabelMap.at<uchar>(y, x) = inOpenList;
-                }
-                else // _LabelMap.at<uchar>(y, x) == inOpenList
-                {
+                } else  { // _LabelMap.at<uchar>(y, x) == inOpenList
                     // Find the node
                     int index = point2index(Point(x, y));
                     Node* node = OpenDict[index];

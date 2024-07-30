@@ -35,6 +35,7 @@ private: // Private variable
     // Transform
     Mat R;
     Mat t;
+    Mat Map;
 
 };
 
