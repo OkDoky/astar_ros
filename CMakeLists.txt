@@ -11,18 +11,13 @@ find_package(catkin REQUIRED COMPONENTS
         geometry_msgs
         nav_msgs
         tf
-        message_generation
-        )
+        astar_ros_msgs
+	)
 
-add_service_files(
-  FILES
-  GetPlan.srv
-)
 
-generate_messages(DEPENDENCIES geometry_msgs nav_msgs)
 
 catkin_package(
-        CATKIN_DEPENDS roscpp rospy geometry_msgs nav_msgs tf message_runtime
+        CATKIN_DEPENDS roscpp rospy geometry_msgs nav_msgs tf astar_ros_msgs
 )
 
 include_directories(
